@@ -1,4 +1,4 @@
-from flask import request, jsonify, Response
+from flask import request, jsonify
 from project import app, db
 from project.models import User, Game
 from datetime import datetime, timedelta

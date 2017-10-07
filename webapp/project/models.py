@@ -18,27 +18,28 @@ class Game(db.Model):
         return '<Game {name}>'.format(name=self.name)
 
 
+class UserType(enum.Enum):
+    villager = 0
+    wolf = 1
+    seer = 2
+    hunter = 3
+    cupid = 4
+    witch = 5
+    little_girl = 6
+
+
 class User(db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     alive = db.Column(db.Boolean, default=True)
-    type_player = db.Column(db.String(80))
+    type_player = db.Column(db.Enum(UserType))
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     game = db.relationship('Game', foreign_keys=[game_id],
                            back_populates="players")
 
-    __mapper_args__ = {'polymorphic_identity': 'villager',
-                       'polymorphic_on': type_player}
-
     def __repr__(self):
         return '<User {name}>'.format(name=self.username)
-
-
-class Wolf(User):
-    __tablename__ = "wolf"
-    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    __mapper_args__ = {'polymorphic_identity': 'wolf'}
 
 
 class RoundType(enum.Enum):
