@@ -6,11 +6,11 @@ import datetime
 class Game(db.Model):
     __tablaname__ = "game"
     id = db.Column(db.Integer, primary_key=True)
-    admin = db.Column(db.Integer, db.ForeignKey('user.id'))
     game_name = db.Column(db.String(80))
     players = db.relationship("User", back_populates="game",
                               foreign_keys="[User.game_id]")
-    rounds = db.relationship("Round", back_populates="game")
+    rounds = db.relationship("Round", back_populates="game",
+                             order_by="Round.end_time")
     start_time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     started = db.Column(db.Boolean, default=False)
 
@@ -46,7 +46,6 @@ class RoundType(enum.Enum):
     day = 0
     night = 1
 
-
 class Round(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
@@ -55,6 +54,7 @@ class Round(db.Model):
     round_type = db.Column(db.Enum(RoundType))
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
+    votes = db.relationship('Vote', back_populates="round")
 
     def __repr__(self):
         return '<Round {game_id}>'.format(game_id=str(self.game_id))
@@ -62,9 +62,11 @@ class Round(db.Model):
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    round_id = db.Column(db.Integer, primary_key=True)
+    round_id = db.Column(db.Integer, db.ForeignKey('round.id'))
     player_from_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     player_to_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    round = db.relationship('Round', back_populates="votes",
+                            foreign_keys=[round_id])
 
     def __repr__(self):
         return '<Vote {id}>'.format(id=str(self.id))
