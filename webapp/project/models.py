@@ -8,10 +8,14 @@ class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     admin = db.Column(db.Integer, db.ForeignKey('user.id'))
     game_name = db.Column(db.String(80))
-    players = db.relationship("User", back_populates="game")
+    players = db.relationship("User", back_populates="game",
+                              foreign_keys="[User.game_id]")
     rounds = db.relationship("Round", back_populates="game")
     start_time = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     started = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return '<Game {name}>'.format(name=self.name)
 
 
 class User(db.Model):
@@ -20,8 +24,9 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     alive = db.Column(db.Boolean, default=True)
     type_player = db.Column(db.String(80))
-    game_id = db.Column(db.ForeignKey('game.id'))
-    game = db.relationship('Game', back_populates="players")
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    game = db.relationship('Game', foreign_keys=[game_id],
+                           back_populates="players")
 
     __mapper_args__ = {'polymorphic_identity': 'villager',
                        'polymorphic_on': type_player}
@@ -44,7 +49,8 @@ class RoundType(enum.Enum):
 class Round(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
-    game = db.relationship('Game', back_populates="rounds")
+    game = db.relationship('Game', foreign_keys=[game_id],
+                           back_populates="rounds")
     round_type = db.Column(db.Enum(RoundType))
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
