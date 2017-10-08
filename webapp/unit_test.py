@@ -110,6 +110,19 @@ class Test(unittest.TestCase):
         assert len(dead_users) == 1
         assert dead_users[0]['user_id'] == target['user_id']
 
+        # Day time. Everybody votes for the first non dead player
+        # Let's try to make the dead guy vote.
+        dead_guy = dead_users[0]
+        with self.assertRaises(Exception):
+            rv = self.app.post('/api/vote',
+                               data=json.dumps(
+                                    {'user_from_id': dead_guy['user_id'],
+                                     'user_to_id': dead_guy['user_id'],
+                                     'game_id': game_id}),
+                               content_type='application/json')
+        # Everybody except the dead guy will vote for the 
+        target = users[0]
+
 
 if __name__ == '__main__':
     unittest.main()
