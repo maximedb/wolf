@@ -1,8 +1,8 @@
 from flask import request, jsonify
 from project import app, db
-from project.models import User, Game, Round
+from project.models import User, Game
 from datetime import datetime, timedelta
-from project.internal_commands import allocate_users, new_round
+from project.internal_commands import allocate_users, new_round, vote_for
 
 
 @app.route('/api/user', methods=['POST'])
@@ -180,3 +180,30 @@ def user_view():
     return jsonify({'round_type': round_type.value,
                     'user_type': user.type_player.value,
                     'action_required': False})
+
+
+@app.route('/api/vote', methods=['POST'])
+def vote():
+    """
+    Function to vote for a player.
+    """
+    data = request.get_json()
+    if 'user_from_id' not in data:
+        return 'Specify a user from', 400
+    if 'user_to_id' not in data:
+        return 'Specify a user to', 400
+    user_from = User.query.get(data['user_from_id'])
+    if user_from is None:
+        return 'User id not correct', 400
+    user_to = User.query.get(data['user_to_id'])
+    if user_to is None:
+        return 'User id is not correct', 400
+    if 'game_id' not in data:
+        return 'Please provide a game id', 400
+    game = Game.query.get(data['game_id'])
+    if game is None:
+        return 'Please provide a valid game id', 400
+    vote = vote_for(game, user_from, user_to)
+    db.session.add(vote)
+    db.session.commit()
+    return jsonify({'vote_id': vote.id})

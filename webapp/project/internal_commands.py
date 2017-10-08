@@ -1,5 +1,5 @@
 from project import db
-from project.models import UserType, Round, RoundType
+from project.models import UserType, Round, RoundType, Vote
 import random
 from datetime import datetime, timedelta
 
@@ -69,7 +69,7 @@ def onboard_user(user):
     db.session.commit()
 
 
-def new_round(game, delta=timedelta(minutes=15), day=True):
+def new_round(game, delta=timedelta(minutes=15), day=False):
     """ Create a new round """
     type = RoundType.day if day else RoundType.night
     round = Round(game_id=game.id, round_type=type, start_time=datetime.now(),
@@ -77,3 +77,30 @@ def new_round(game, delta=timedelta(minutes=15), day=True):
     game.rounds.append(round)
     db.session.commit()
     return "OK"
+
+
+def vote_for(game, ufrom, uto):
+    """ Vote for a  player from a user """
+    # Get the latest round assigned to a game.
+    round = game.rounds[-1]
+    # Check that the player is still alive
+    if ufrom.alive is False:
+        raise RuntimeError('Player should alive to vote')
+    # Get the round type
+    round_type = round.round_type
+    user_type = ufrom.type_player
+    # If the user tries to vote during the night and he is not a wolf.
+    if (round_type == RoundType.night) & (user_type != UserType.wolf):
+        raise RuntimeError('User should be a wolf to vote during the night')
+    # Ok allowed to vote. Checked that he has not voted yet during this round.
+    vote = Vote.filter_by(round_id=round.id, player_from_id=ufrom.id).first()
+    if vote is not None:
+        raise RuntimeError('User has already voted during this round.')
+    # Cannot vote for a dead player
+    if uto.alive is False:
+        raise RuntimeError('Cannot vote for a dead player')
+    # Ok we can take the vote
+    vote = Vote(round_id=round.id, player_from_id=ufrom.id,
+                player_to_id=uto.id)
+    # Return the vote to main fucntion
+    return vote
