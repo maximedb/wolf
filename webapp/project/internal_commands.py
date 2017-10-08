@@ -1,7 +1,8 @@
 from project import db
-from project.models import UserType, Round, RoundType, Vote
+from project.models import UserType, Round, RoundType, Vote, User
 import random
 from datetime import datetime, timedelta
+import collections
 
 mapping = {'wolf': UserType.wolf, 'seer': UserType.seer,
            'hunter': UserType.seer, 'cupid': UserType.cupid,
@@ -69,9 +70,15 @@ def onboard_user(user):
     db.session.commit()
 
 
-def new_round(game, delta=timedelta(minutes=15), day=False):
+def new_round(game, delta=timedelta(minutes=15)):
     """ Create a new round """
-    type = RoundType.day if day else RoundType.night
+    if len(game.rounds) == 0:
+        type = RoundType.night
+    else:
+        if game.rounds[-1].round_type == RoundType.day:
+            type = RoundType.night
+        else:
+            type = RoundType.day
     round = Round(game_id=game.id, round_type=type, start_time=datetime.now(),
                   end_time=datetime.now()+delta)
     game.rounds.append(round)
@@ -82,25 +89,48 @@ def new_round(game, delta=timedelta(minutes=15), day=False):
 def vote_for(game, ufrom, uto):
     """ Vote for a  player from a user """
     # Get the latest round assigned to a game.
-    round = game.rounds[-1]
+    r = game.rounds[-1]
     # Check that the player is still alive
     if ufrom.alive is False:
         raise RuntimeError('Player should alive to vote')
     # Get the round type
-    round_type = round.round_type
+    round_type = r.round_type
     user_type = ufrom.type_player
     # If the user tries to vote during the night and he is not a wolf.
     if (round_type == RoundType.night) & (user_type != UserType.wolf):
         raise RuntimeError('User should be a wolf to vote during the night')
     # Ok allowed to vote. Checked that he has not voted yet during this round.
-    vote = Vote.filter_by(round_id=round.id, player_from_id=ufrom.id).first()
+    vote = Vote.query.filter_by(round_id=r.id, player_from_id=ufrom.id).first()
     if vote is not None:
         raise RuntimeError('User has already voted during this round.')
     # Cannot vote for a dead player
     if uto.alive is False:
         raise RuntimeError('Cannot vote for a dead player')
     # Ok we can take the vote
-    vote = Vote(round_id=round.id, player_from_id=ufrom.id,
+    vote = Vote(round_id=r.id, player_from_id=ufrom.id,
                 player_to_id=uto.id)
     # Return the vote to main fucntion
     return vote
+
+
+def check_end_of_round(game):
+    """
+    Given a game, checks that end of the game is done
+    If it is, compute the votes results and make a new round.
+    """
+    last_round = game.rounds[-1]
+    if last_round.end_time <= datetime.now():
+        # Round is ooooover!
+        # Let's compute the results and check who's DEAD.
+        votes = last_round.votes
+        counter = collections.Counter()
+        for vote in votes:
+            counter[vote.player_to_id] += 1
+        dead_id = counter.most_common(1)[0][0]
+        print(dead_id)
+        dead_user = User.query.get(dead_id)
+        dead_user.alive = False
+        db.session.commit()
+        return True
+    else:
+        return False

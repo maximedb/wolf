@@ -3,6 +3,7 @@ from project import app, db
 from project.models import User, Game
 from datetime import datetime, timedelta
 from project.internal_commands import allocate_users, new_round, vote_for
+from project.internal_commands import check_end_of_round
 
 
 @app.route('/api/user', methods=['POST'])
@@ -130,8 +131,8 @@ def start_game():
     return "Started"
 
 
-@app.route('/api/main_view', methods=['GET'])
-def main_view():
+@app.route('/api/main_state', methods=['GET'])
+def main_state():
     """
     Main view to get the general data about a game.
     Returns:
@@ -146,24 +147,31 @@ def main_view():
     game = Game.query.get(game_id)
     if game is None:
         return 'Wrong game_id', 400
+    # Check if this round should end now
+    ended = check_end_of_round(game)
+    if ended:
+        # The previous round ended, start a new one.
+        new_round(game)
     players = game.players
-    users = [{'user_name': u.username, 'status': u.alive} for u in players]
-    # current_round = Round.query.filter_by(game_id=game.id). \
-    #     order_by(Round.end_time.desc()).first()
+    users = [{'user_name': u.username, 'status': u.alive, 'user_id': u.id}
+             for u in players]
     current_round = game.rounds[-1]
     end_time = current_round.end_time.isoformat()
     return jsonify({'game_id': game.id, 'game_name': game.game_name,
-                    'end_time': end_time, 'users': users})
+                    'end_time': end_time, 'users': users,
+                    'status': game.started, 'round_id': current_round.id,
+                    'round_type': current_round.round_type.name})
 
 
-@app.route('/api/user_view', methods=['GET'])
-def user_view():
+@app.route('/api/user_state', methods=['GET'])
+def user_state():
     """
     Returns the user data
     Args:
         - user_id (int): the user id
     Returns:
         - round_type (str): the current round_type
+        - game_id (int): the game id
         - user_type (int): the type of the user
         - action_required (boolean): should the user do something
         - action_data ([]): present if an action is required
@@ -177,8 +185,9 @@ def user_view():
     game = user.game
     current_round = game.rounds[-1]
     round_type = current_round.round_type
-    return jsonify({'round_type': round_type.value,
-                    'user_type': user.type_player.value,
+    return jsonify({'round_type': round_type.name,
+                    'game_id': game.id,
+                    'user_type': user.type_player.name,
                     'action_required': False})
 
 
@@ -186,6 +195,10 @@ def user_view():
 def vote():
     """
     Function to vote for a player.
+    Args:
+        - user_from_id (int): the user that votes
+        - user_to_id (int): the user that gets nominated
+        - game_id (int): the game that is currently played
     """
     data = request.get_json()
     if 'user_from_id' not in data:
@@ -207,3 +220,33 @@ def vote():
     db.session.add(vote)
     db.session.commit()
     return jsonify({'vote_id': vote.id})
+
+
+@app.route('/api/end_of_round', methods=['GET'])
+def end_of_round():
+    game_id = request.args.get('game_id')
+    if game_id is None:
+        return 'Please provide a game id', 400
+    game = Game.query.get(game_id)
+    print(game.rounds)
+    if game is None:
+        return 'Please provide a valid game id', 400
+    ended, data = check_end_of_round(game)
+    new_round(game)
+    return "OK"
+
+
+@app.route('/api/end_round', methods=['POST'])
+def end_round():
+    """
+    End the current round for a game.
+    Args:
+        - game_id (int): the game
+    """
+    data = request.get_json()
+    game_id = data['game_id']
+    game = Game.query.get(game_id)
+    latest_round = game.rounds[-1]
+    latest_round.end_time = datetime.utcnow()
+    db.session.commit()
+    return jsonify({'end_time': latest_round.end_time.isoformat()})
