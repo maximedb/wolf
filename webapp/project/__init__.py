@@ -7,3 +7,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.sqlite'
 db = SQLAlchemy(app)
 
 from project.views import *
+from project.models import *
+
+db.create_all()

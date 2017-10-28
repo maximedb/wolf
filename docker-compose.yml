@@ -1,0 +1,16 @@
+version: "2"
+services:
+  web:
+    restart: always
+    build: ./webapp
+    ports:
+     - "8000"
+    command: /usr/local/bin/gunicorn -w 2 -b :8000 run
+    volumes:
+      - ./Data/data/vocab/:/app/data/vocab/
+
+  nginx:
+    restart: always
+    build: ./nginx
+    ports:
+      - "80:80"

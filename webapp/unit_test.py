@@ -1,8 +1,6 @@
 import unittest
 from project import app, db
-from project.models import UserType, RoundType
 import json
-import time
 
 
 class Test(unittest.TestCase):
@@ -120,7 +118,7 @@ class Test(unittest.TestCase):
                                      'user_to_id': dead_guy['user_id'],
                                      'game_id': game_id}),
                                content_type='application/json')
-        # Everybody except the dead guy will vote for the 
+        # Everybody except the dead guy will vote for the
         target = users[0]
 
 
