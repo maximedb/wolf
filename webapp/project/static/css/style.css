@@ -1,0 +1,59 @@
+body.night {
+  background: linear-gradient(45deg, black, #141435);
+  color: white;
+}
+
+body.day {
+  background: linear-gradient(45deg, rgba(27, 0, 255, 0.06), #ffffff);
+  color: #292929;
+}
+
+#main-logo {
+  margin-bottom: 100px;
+  width: 250px;
+}
+
+
+/* PLAY */
+
+#header img {
+  width: 100px;
+}
+
+.night #header {
+  border-bottom: 1px solid rgba(245, 245, 245, 0.15);
+}
+
+.day #header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+p, h1, h2, h3 {
+  font-family: 'Lato', sans-serif;
+}
+
+.night .player-list-item {
+  border-bottom: 1px solid rgba(245, 245, 245, 0.19);
+  background: linear-gradient(0deg, rgba(253, 253, 253, 0.05), rgba(255, 255, 255, 0));
+  display: flex;
+  justify-content: space-between;
+}
+
+.day .player-list-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.19);
+  background: linear-gradient(0deg, #f8fff9, rgba(255, 255, 255, 0));
+  display: flex;
+  justify-content: space-between;
+}
+
+.player-list-item.dead {
+  opacity: 0.25;
+}
+
+.night .player-list-item a, .night .player-list-item a:focus, .night .player-list-item a:visited {
+  color: white;
+}
+
+.player-list-item:nth-child(0){
+  border-top: 1px solid rgba(245, 245, 245, 0.17);
+}
