@@ -33,7 +33,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     alive = db.Column(db.Boolean, default=True)
-    type_player = db.Column(db.Enum(UserType))
+    type_player = db.Column(db.Enum(UserType), default=UserType.villager)
     game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
     game = db.relationship('Game', foreign_keys=[game_id],
                            back_populates="players")

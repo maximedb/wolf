@@ -118,6 +118,8 @@ def check_end_of_round(game):
     Given a game, checks that end of the game is done
     If it is, compute the votes results and make a new round.
     """
+    if len(game.rounds) == 0:
+        return False
     last_round = game.rounds[-1]
     if last_round.end_time <= datetime.now():
         # Round is ooooover!

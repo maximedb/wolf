@@ -80,19 +80,18 @@ def join_game():
     """
     data = request.get_json()
     if 'game_id' not in data:
-        return 'please provide a game_id', 400
+        raise RuntimeError('please provide a game_id')
     if 'user_id' not in data:
-        return 'please provide a user_id', 400
+        raise RuntimeError('please provide a user_id')
     user = User.query.get(data['user_id'])
     if user is None:
-        return 'please provide a valid user', 400
+        raise RuntimeError('please provide a valid user')
     game = Game.query.get(data['game_id'])
     if game is None:
-        return 'please provide a valid game', 400
+        raise RuntimeError('please provide a valid game')
     if user.game is not None:
-        return 'User already joined a game', 400
+        raise RuntimeError('User already joined a game')
     user.game = game
-    db.session.add(user)
     db.session.commit()
     return jsonify({'game_id': game.id})
 
@@ -109,7 +108,7 @@ def list_games():
     games_j = [{'game_id': g.id, 'game_name': g.game_name} for g in games]
     return jsonify(games_j)
 
-
+# curl -d '{"game_id":3}' -H "Content-Type: application/json" -X POST http://192.168.99.100/api/start_game
 @app.route('/api/start_game', methods=['POST'])
 def start_game():
     """
@@ -119,10 +118,10 @@ def start_game():
     """
     data = request.get_json()
     if 'game_id' not in data:
-        return 'Provide a game id please', 400
+        raise RuntimeError('Provide a game id please')
     game = Game.query.get(data['game_id'])
     if game is None:
-        return 'Invalid game', 400
+        raise RuntimeError('Invalid game')
     game.started = True
     game.start_time = datetime.now()
     allocate_users(game)
@@ -155,12 +154,22 @@ def main_state():
     players = game.players
     users = [{'user_name': u.username, 'status': u.alive, 'user_id': u.id}
              for u in players]
-    current_round = game.rounds[-1]
-    end_time = current_round.end_time.isoformat()
+
+    if game.started:
+        current_round = game.rounds[-1]
+        round_id = current_round.id
+        round_type = current_round.round_type.name
+        end_time = current_round.end_time.isoformat()
+    else:
+        current_round = None
+        round_type = None
+        round_id = None
+        end_time = None
+
     return jsonify({'game_id': game.id, 'game_name': game.game_name,
                     'end_time': end_time, 'users': users,
-                    'status': game.started, 'round_id': current_round.id,
-                    'round_type': current_round.round_type.name})
+                    'status': game.started, 'round_id': round_id,
+                    'round_type': round_type})
 
 
 @app.route('/api/user_state', methods=['GET'])
@@ -178,16 +187,26 @@ def user_state():
     """
     user_id = request.args.get('user_id')
     if user_id is None:
-        return 'Please provide a game_id', 400
-    user = User.query.get(user_id)
+        raise RuntimeError('Please provide a game_id')
+    user = User.query.get(int(user_id))
     if user is None:
-        return 'Wrong user', 400
+        raise RuntimeError('Wrong user')
     game = user.game
-    current_round = game.rounds[-1]
-    round_type = current_round.round_type
-    return jsonify({'round_type': round_type.name,
+    users = [{'player_id': u.id, 'player_name': u.username,
+              'player_type': u.type_player.name, 'alive': u.alive}
+             for u in game.players]
+    if game.started:
+        current_round = game.rounds[-1]
+        round_type = current_round.round_type.name
+    else:
+        current_round = None
+        round_type = None
+
+    return jsonify({'round_type': round_type,
                     'game_id': game.id,
+                    'started': game.started,
                     'user_type': user.type_player.name,
+                    'users': users,
                     'action_required': False})
 
 

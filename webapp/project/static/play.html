@@ -1,4 +1,4 @@
-<html lang="en">
+<html lang="en" ng-app="wolf">
   <head>
     <title>Loup-Garou</title>
     <!-- Required meta tags -->
@@ -12,12 +12,14 @@
       rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.js"></script>
+    <script src="js/js.js"></script>
   </head>
-  <body class="night container-fluid">
+  <body class="night container-fluid" ng-controller="playerView">
     <!-- HEADER -->
     <div id="header" class="d-flex align-items-center pt-3 pb-3 mb-3">
       <img src="img/logo.gif" class="mr-auto">
-      <button class="btn btn-info align-middle d-flex">
+      <button class="btn btn-info align-middle d-flex" ng-if="started" ng-click="show_card">
         <i class="material-icons mr-2">face</i>
         Carte
       </button>
@@ -26,9 +28,11 @@
 
     <!-- KILL -->
     <div>
-      <h2>La nuit est tombée sur Matagoutou... Les loup-garous sont de sortie, qui vont-ils dévorer ?</h2>
-      <div class="player-list-item p-3">
-        <a href="">Camille (3 votes)</a><i class="material-icons">person</i>
+      <h2 ng-if="!started">Le village est toujours en construction... Un peu de patience.</h2>
+      <h2 ng-if="roundtype == 'night'">La nuit est tombée sur Matagoutou... Les loup-garous sont de sortie, qui vont-ils dévorer ?</h2>
+
+      <div class="player-list-item p-3" ng-repeat="user in users">
+        <a href="" ng-bind="user.player_name"></a><i class="material-icons">person</i>
       </div>
 
       <div class="player-list-item p-3 dead">
