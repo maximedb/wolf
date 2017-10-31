@@ -67,7 +67,6 @@ def onboard_user(user):
     """ Given a new user, assigns a player type """
     choices = random.shuffle(mapping)
     user.type_player = choices[0]
-    db.session.commit()
 
 
 def new_round(game, delta=timedelta(minutes=15)):
@@ -99,13 +98,13 @@ def vote_for(game, ufrom, uto):
     # If the user tries to vote during the night and he is not a wolf.
     if (round_type == RoundType.night) & (user_type != UserType.wolf):
         raise RuntimeError('User should be a wolf to vote during the night')
-    # Ok allowed to vote. Checked that he has not voted yet during this round.
-    vote = Vote.query.filter_by(round_id=r.id, player_from_id=ufrom.id).first()
-    if vote is not None:
-        raise RuntimeError('User has already voted during this round.')
     # Cannot vote for a dead player
     if uto.alive is False:
         raise RuntimeError('Cannot vote for a dead player')
+    # Ok allowed to vote. Checked that he has not voted yet during this round.
+    vote = Vote.query.filter_by(round_id=r.id, player_from_id=ufrom.id).first()
+    if vote is not None:
+        db.session.delete(vote)
     # Ok we can take the vote
     vote = Vote(round_id=r.id, player_from_id=ufrom.id,
                 player_to_id=uto.id)
@@ -128,6 +127,8 @@ def check_end_of_round(game):
         counter = collections.Counter()
         for vote in votes:
             counter[vote.player_to_id] += 1
+        if len(counter) == 0:
+            return True
         dead_id = counter.most_common(1)[0][0]
         print(dead_id)
         dead_user = User.query.get(dead_id)

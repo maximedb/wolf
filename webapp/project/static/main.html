@@ -15,26 +15,46 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.js"></script>
     <script src="js/js.js"></script>
   </head>
-  <body class="night container-fluid" ng-controller="mainView">
+  <body class="container-fluid" ng-controller="mainView" ng-class="{night: round_type != 'day', day: round_type == 'day'}">
     <!-- HEADER -->
     <div id="header" class="d-flex align-items-center pt-3 pb-3 mb-3">
-      <img src="img/logo.gif" class="mr-auto">
-      <span class="badge badge-light mr-4 p-2">Code Postal: <span ng-bind="game_id"></span></span>
-      <button class="btn btn-info align-middle d-flex" ng-if="!started" ng-click="show_card()">
+      <img src="img/logo.gif" class="mr-auto" ng-if="round_type != 'day'">
+      <img src="img/logo-black.gif" class="mr-auto" ng-if="round_type == 'day'">
+      <span class="badge badge-primary mr-4 p-2" ng-if="round_type=='day'">Jour</span>
+      <span class="badge badge-primary mr-4 p-2" ng-if="round_type=='night'">Nuit</span>
+      <span class="badge badge-primary mr-4 p-2">Code Postal: <span ng-bind="game_id"></span></span>
+      <button class="btn btn-info align-middle d-flex" ng-if="!started" ng-click="start_game()">
         Commencer
       </button>
     </div>
     <div class="row">
       <div class="col-md-6">
-        <div class="player-list-item p-3" ng-repeat="user in users">
-          <a href="" ng-bind="user.user_name"></a><i class="material-icons">person</i>
+        <div class="player-list-item p-3" ng-repeat="user in users" ng-class="{dead: user.status == false}">
+          <a href="" ng-click="kill_user(user.player_id)">
+            <span ng-bind="user.user_name"></span>
+            <span ng-if="(user.number_of_votes > 0) && (round_type == 'day')">
+              (<span ng-bind="user.number_of_votes"></span>)
+            </span>
+          </a><i class="material-icons">person</i>
         </div>
         <div ng-if="users.length == 0"><p>Le village est vide...</p></div>
       </div>
+      <div class="col-md-6 d-flex align-items-center justify-content-center">
+        <div ng-if="started">
+          <p class="text-center" id="clock">
+            <span ng-bind="minutes"></span>:<span ng-bind="seconds"></span>
+          </p>
+          <p class="text-center" ng-if="round_type=='night'">avant le lever du jour</p>
+          <p class="text-center" ng-if="round_type=='day'">avant le coucher du soleil</p>
+        </div>
+      </div>
+    </div>
 
-    <!-- KILL -->
-    <div>
-
+    <!-- COUNT DOWN -->
+    <div id="show_result" ng-if="show_result" class="d-flex justify-content-center align-items-center">
+      <p class="text-center" id="clock">
+        Ciao <span ng-bind="byebye"></span>
+      </p>
     </div>
 
     <!-- Optional JavaScript -->

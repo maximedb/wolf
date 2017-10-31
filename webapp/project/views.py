@@ -1,9 +1,9 @@
 from flask import request, jsonify
 from project import app, db
-from project.models import User, Game
+from project.models import User, Game, Vote
 from datetime import datetime, timedelta
 from project.internal_commands import allocate_users, new_round, vote_for
-from project.internal_commands import check_end_of_round
+from project.internal_commands import check_end_of_round, onboard_user
 
 
 @app.route('/api/user', methods=['POST'])
@@ -92,6 +92,8 @@ def join_game():
     if user.game is not None:
         raise RuntimeError('User already joined a game')
     user.game = game
+    if game.started:
+        onboard_user(user)
     db.session.commit()
     return jsonify({'game_id': game.id})
 
@@ -151,20 +153,23 @@ def main_state():
     if ended:
         # The previous round ended, start a new one.
         new_round(game)
-    players = game.players
-    users = [{'user_name': u.username, 'status': u.alive, 'user_id': u.id}
-             for u in players]
 
     if game.started:
         current_round = game.rounds[-1]
         round_id = current_round.id
         round_type = current_round.round_type.name
         end_time = current_round.end_time.isoformat()
+
     else:
         current_round = None
         round_type = None
         round_id = None
         end_time = None
+
+    players = game.players
+    users = [{'user_name': u.username, 'status': u.alive, 'user_id': u.id,
+              'number_of_votes': u.number_of_votes(round_id)}
+             for u in players]
 
     return jsonify({'game_id': game.id, 'game_name': game.game_name,
                     'end_time': end_time, 'users': users,
@@ -198,15 +203,22 @@ def user_state():
     if game.started:
         current_round = game.rounds[-1]
         round_type = current_round.round_type.name
+        voted_for = Vote.query.filter_by(player_from_id=user.id,
+                                         round_id=current_round.id).first()
+        if voted_for is not None:
+            voted_for = voted_for.player_to_id
+
     else:
         current_round = None
         round_type = None
+        voted_for = None
 
     return jsonify({'round_type': round_type,
                     'game_id': game.id,
                     'started': game.started,
                     'user_type': user.type_player.name,
                     'users': users,
+                    'voted_for': voted_for,
                     'action_required': False})
 
 
@@ -221,20 +233,20 @@ def vote():
     """
     data = request.get_json()
     if 'user_from_id' not in data:
-        return 'Specify a user from', 400
+        raise RuntimeError('Specify a user from')
     if 'user_to_id' not in data:
-        return 'Specify a user to', 400
+        raise RuntimeError('Specify a user to')
     user_from = User.query.get(data['user_from_id'])
     if user_from is None:
-        return 'User id not correct', 400
+        raise RuntimeError('User id not correct')
     user_to = User.query.get(data['user_to_id'])
     if user_to is None:
-        return 'User id is not correct', 400
+        raise RuntimeError('User id is not correct')
     if 'game_id' not in data:
-        return 'Please provide a game id', 400
+        raise RuntimeError('Please provide a game id')
     game = Game.query.get(data['game_id'])
     if game is None:
-        return 'Please provide a valid game id', 400
+        raise RuntimeError('Please provide a valid game id')
     vote = vote_for(game, user_from, user_to)
     db.session.add(vote)
     db.session.commit()
@@ -255,6 +267,7 @@ def end_of_round():
     return "OK"
 
 
+# curl -d '{"game_id":1}' -H "Content-Type: application/json" -X POST http://192.168.99.100/api/end_round
 @app.route('/api/end_round', methods=['POST'])
 def end_round():
     """
@@ -269,3 +282,19 @@ def end_round():
     latest_round.end_time = datetime.utcnow()
     db.session.commit()
     return jsonify({'end_time': latest_round.end_time.isoformat()})
+
+
+# curl -d '{"game_id":1}' -H "Content-Type: application/json" -X POST http://192.168.99.100/api/end_round
+@app.route('/api/kill', methods=['POST'])
+def kill_user():
+    """
+    End the current round for a game.
+    Args:
+        - game_id (int): the game
+    """
+    data = request.get_json()
+    user_id = data['user_id']
+    user = Game.query.get(user_id)
+    user.alive = False
+    db.session.commit()
+    return "OK"

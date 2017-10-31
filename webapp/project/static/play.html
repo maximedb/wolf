@@ -19,7 +19,7 @@
     <!-- HEADER -->
     <div id="header" class="d-flex align-items-center pt-3 pb-3 mb-3">
       <img src="img/logo.gif" class="mr-auto">
-      <button class="btn btn-info align-middle d-flex" ng-if="started" ng-click="show_card">
+      <button class="btn btn-info align-middle d-flex" ng-if="started" ng-click="show_card()">
         <i class="material-icons mr-2">face</i>
         Carte
       </button>
@@ -30,13 +30,13 @@
     <div>
       <h2 ng-if="!started">Le village est toujours en construction... Un peu de patience.</h2>
       <h2 ng-if="roundtype == 'night'">La nuit est tombée sur Matagoutou... Les loup-garous sont de sortie, qui vont-ils dévorer ?</h2>
+      <h2 ng-if="roundtype == 'day'">Le jour se lève sur Matagoutu... qui est un loup-garou parmi les villageois ?</h2>
 
-      <div class="player-list-item p-3" ng-repeat="user in users">
-        <a href="" ng-bind="user.player_name"></a><i class="material-icons">person</i>
-      </div>
-
-      <div class="player-list-item p-3 dead">
-        <a href="">Maxime - mort</a><i class="material-icons">person_outline</i>
+      <div class="player-list-item p-3" ng-repeat="user in users" ng-class="{voted_for: user.player_id == voted_for, dead: user.alive == false}">
+        <a href="" ng-click="vote_for(user.player_id, $event, user.alive)"
+                   ng-bind="user.player_name" ng-if="user.alive"></a>
+        <span href="" ng-click="vote_for(user.player_id, $event, user.alive)"
+                   ng-bind="user.player_name" ng-if="!user.alive"></span><i class="material-icons">person</i>
       </div>
     </div>
 

@@ -33,7 +33,7 @@ p, h1, h2, h3 {
 }
 
 .night .player-list-item {
-  border-bottom: 1px solid rgba(245, 245, 245, 0.19);
+  border-bottom: 1px solid #232323;
   background: linear-gradient(0deg, rgba(253, 253, 253, 0.05), rgba(255, 255, 255, 0));
   display: flex;
   justify-content: space-between;
@@ -56,4 +56,37 @@ p, h1, h2, h3 {
 
 .player-list-item:nth-child(0){
   border-top: 1px solid rgba(245, 245, 245, 0.17);
+}
+
+#clock {
+  text-align: center;
+  font-size: 67px;
+  margin: 0px;
+  margin-top: 50px;
+}
+
+.night .voted_for, .day .voted_for {
+  background-color: turquoise;
+}
+
+.night .player-list-item.dead {
+    opacity: 0.5;
+    background: linear-gradient(180deg, #610000, rgba(255, 255, 255, 0));
+    pointer-events: none;
+}
+
+.day .player-list-item.dead {
+  opacity: 0.5;
+  background: linear-gradient(180deg, #ffacac, rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+#show_result {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  background-color: black;
+  color: white;
 }

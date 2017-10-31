@@ -41,10 +41,15 @@ class User(db.Model):
     def __repr__(self):
         return '<User {name}>'.format(name=self.username)
 
+    def number_of_votes(self, round_id):
+        return Vote.query.filter_by(player_to_id=self.id,
+                                    round_id=round_id).count()
+
 
 class RoundType(enum.Enum):
     day = 0
     night = 1
+
 
 class Round(db.Model):
     id = db.Column(db.Integer, primary_key=True)
