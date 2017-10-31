@@ -25,19 +25,19 @@ def allocate_users(game):
     if num_users > 18:
         raise RuntimeError('Number of users is too big.')
     alloc = [
-        {'wolf': 2, 'seer': 1},  # 6 - 3 villagers
-        {'wolf': 2, 'seer': 1, 'hunter': 1},  # 7- 3 villagers
-        {'wolf': 2, 'seer': 1, 'hunter': 1, 'cupid': 1},  # 8 - 3 villagers
-        {'wolf': 2, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1},  # 9
-        {'wolf': 2, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 2, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 3, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 3, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 3, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 3, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 4, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 4, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
-        {'wolf': 5, 'seer': 1, 'hunter': 1, 'cupid': 1, 'witch': 1, 'girl': 1},
+        {'wolf': 2},
+        {'wolf': 2},
+        {'wolf': 2},
+        {'wolf': 2},
+        {'wolf': 2},
+        {'wolf': 2},
+        {'wolf': 3},
+        {'wolf': 3},
+        {'wolf': 3},
+        {'wolf': 3},
+        {'wolf': 4},
+        {'wolf': 4},
+        {'wolf': 5},
     ]
 
     # According to the number of players, choose the right line.

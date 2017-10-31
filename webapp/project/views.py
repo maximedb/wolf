@@ -1,9 +1,24 @@
-from flask import request, jsonify
+from flask import request, jsonify, render_template
 from project import app, db
 from project.models import User, Game, Vote
 from datetime import datetime, timedelta
 from project.internal_commands import allocate_users, new_round, vote_for
 from project.internal_commands import check_end_of_round, onboard_user
+
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+
+@app.route('/play', methods=['GET'])
+def play():
+    return render_template('play.html')
+
+
+@app.route('/main', methods=['GET'])
+def main():
+    return render_template('main.html')
 
 
 @app.route('/api/user', methods=['POST'])

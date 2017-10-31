@@ -7,18 +7,18 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.js"></script>
-    <script src="js/js.js"></script>
+    <script src="{{url_for('static', filename='js/js.js')}}"></script>
   </head>
   <body class="night container-fluid" ng-controller="playerView">
     <!-- HEADER -->
     <div id="header" class="d-flex align-items-center pt-3 pb-3 mb-3">
-      <img src="img/logo.gif" class="mr-auto">
+    <img src="{{url_for('static', filename='img/logo.gif')}}">
       <button class="btn btn-info align-middle d-flex" ng-if="started" ng-click="show_card()">
         <i class="material-icons mr-2">face</i>
         Personnage

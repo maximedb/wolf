@@ -7,19 +7,19 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.js"></script>
-    <script src="js/js.js"></script>
+    <script src="{{url_for('static', filename='js/js.js')}}"></script>
   </head>
   <body class="container-fluid" ng-controller="mainView" ng-class="{night: round_type != 'day', day: round_type == 'day'}">
     <!-- HEADER -->
     <div id="header" class="d-flex align-items-center pt-3 pb-3 mb-3">
-      <img src="img/logo.gif" class="mr-auto" ng-if="round_type != 'day'">
-      <img src="img/logo-black.gif" class="mr-auto" ng-if="round_type == 'day'">
+      <img src="{{url_for('static', filename='img/logo.gif')}}" class="mr-auto" ng-if="round_type != 'day'">
+      <img src="{{url_for('static', filename='img/logo-black.gif')}}" class="mr-auto" ng-if="round_type == 'day'">
       <span class="badge badge-primary mr-4 p-2" ng-if="round_type=='day'">Jour</span>
       <span class="badge badge-primary mr-4 p-2" ng-if="round_type=='night'">Nuit</span>
       <span class="badge badge-primary mr-4 p-2">Code Postal: <span ng-bind="game_id"></span></span>

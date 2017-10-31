@@ -38,7 +38,7 @@ app.controller('startView', function($scope, $http, $window){
       console.log(data);
       $scope.game_id = data.data.game_id
       localStorage.setItem('gameid', $scope.game_id)
-      $window.location.href = 'main.html';
+      $window.location.href = '/main';
     })
   }
 
@@ -60,6 +60,7 @@ app.controller('startView', function($scope, $http, $window){
     }).then(function(data){
       // Ok let's go the gaaaame
       console.log(data)
+      $window.location.href = 'play';
     }, function(error){
       console.log(error)
     })
