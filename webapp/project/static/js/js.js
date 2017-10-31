@@ -17,6 +17,10 @@ function getDiff(past, now) {
   return ret;
 }
 
+mapping = {'villager': 'villageois', 'wolf': 'loup-garou', 'seer': 'voyant',
+           'cupid': 'cupidon', 'hunter': 'chasseur', 'little_girl': 'petite fille',
+           'witch': 'sorcière'}
+
 app.controller('startView', function($scope, $http, $window){
   var request = {
    method: 'POST',
@@ -99,7 +103,7 @@ app.controller('playerView', function($scope, $http, $interval){
 
   $scope.show_card = function(){
     console.log($scope.usertype)
-    alert('Vous etes un.... ' + $scope.usertype)
+    alert('Ton personnage est: "' + mapping[$scope.usertype] +'"')
   }
 
   $scope.vote_for = function(user_to, event, alive){

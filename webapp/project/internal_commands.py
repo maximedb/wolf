@@ -65,8 +65,9 @@ def allocate_users(game):
 
 def onboard_user(user):
     """ Given a new user, assigns a player type """
-    choices = random.shuffle(mapping)
-    user.type_player = choices[0]
+    tmp = list(mapping.values())
+    random.shuffle(tmp)
+    user.type_player = tmp[0]
 
 
 def new_round(game, delta=timedelta(minutes=15)):

@@ -21,7 +21,7 @@
       <img src="img/logo.gif" class="mr-auto">
       <button class="btn btn-info align-middle d-flex" ng-if="started" ng-click="show_card()">
         <i class="material-icons mr-2">face</i>
-        Carte
+        Personnage
       </button>
     </div>
     <div>
@@ -33,10 +33,14 @@
       <h2 ng-if="roundtype == 'day'">Le jour se lève sur Matagoutu... qui est un loup-garou parmi les villageois ?</h2>
 
       <div class="player-list-item p-3" ng-repeat="user in users" ng-class="{voted_for: user.player_id == voted_for, dead: user.alive == false}">
-        <a href="" ng-click="vote_for(user.player_id, $event, user.alive)"
-                   ng-bind="user.player_name" ng-if="user.alive"></a>
-        <span href="" ng-click="vote_for(user.player_id, $event, user.alive)"
-                   ng-bind="user.player_name" ng-if="!user.alive"></span><i class="material-icons">person</i>
+        <div>
+          <a href="" ng-click="vote_for(user.player_id, $event, user.alive)"
+                     ng-bind="user.player_name" ng-if="user.alive"></a>
+          <span href="" ng-click="vote_for(user.player_id, $event, user.alive)"
+                     ng-bind="user.player_name" ng-if="!user.alive"></span>
+          <span ng-if="($scope.usertype == 'wolf') && user.player_type == 'wolf'">loup-garou</span>
+        </div>
+        <i class="material-icons">person</i>
       </div>
     </div>
 
